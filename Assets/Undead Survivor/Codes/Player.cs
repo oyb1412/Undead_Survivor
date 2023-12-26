@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
 
     //플레이어 애니메이션
     Animator anim;
+
+    float deadTimer;
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
@@ -43,6 +45,9 @@ public class Player : MonoBehaviour
     //물리연산은 FixedUpdate에서
     private void FixedUpdate()
     {
+        if (!GameManager.Instance.isLive)
+            return;
+
         {
             // 1. 힘을 가함
             //rigid.AddForce(inputVec);
@@ -80,4 +85,29 @@ public class Player : MonoBehaviour
             spriter.flipX = inputVec.x < 0;
         }
     }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (!GameManager.Instance.isLive)
+            return;
+
+        GameManager.Instance.health -= Time.deltaTime * 10;
+
+        if(GameManager.Instance.health < 0)
+        {
+            for(int i = 2; i< transform.childCount; i++)
+            {
+                transform.GetChild(i).gameObject.SetActive(false);
+            }
+            deadTimer += Time.deltaTime;
+            anim.SetTrigger("Dead");
+            if(deadTimer > 1.0f)
+            {
+                GameManager.Instance.GameOver();
+                deadTimer = 0.0f;
+            }
+        }
+    }
+
+
 }

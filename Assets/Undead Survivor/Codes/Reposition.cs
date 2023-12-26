@@ -15,7 +15,7 @@ public class Reposition : MonoBehaviour
     void OnTriggerExit2D(Collider2D collision)
     {
         //타일맵과 에리어(플레이어 주변 영역)간의 충돌이 아니면 무시
-        if (!collision.CompareTag("Area"))
+        if (!collision.CompareTag("Area") || !GameManager.Instance.isLive)
             return;
 
         //플레이어 위치 저장

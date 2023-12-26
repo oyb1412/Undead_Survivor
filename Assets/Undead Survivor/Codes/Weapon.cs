@@ -15,16 +15,15 @@ public class Weapon : MonoBehaviour
     Player player;
     void Awake()
     {
-        player = GetComponentInParent<Player>();
-    }
-    void Start()
-    {
-        Init();
+        player = GameManager.Instance.player;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!GameManager.Instance.isLive)
+            return;
+
         switch (id)
         {
             //0번 무기일때
@@ -61,11 +60,32 @@ public class Weapon : MonoBehaviour
         //무기 재배치
         if(id == 0)
             Batch();
+
+        player.BroadcastMessage("ApplyGear", SendMessageOptions.DontRequireReceiver);
     }
 
     //무기 초기화
-    public void Init()
+    public void Init(ItemData data)
     {
+        // Basic Set
+        name = "Weapon" + data.itemId;
+        transform.parent = player.transform;
+        transform.localPosition = Vector3.zero;
+
+        // Property Set
+        id = data.itemId;
+        damage = data.baseDamage;
+        count = data.baseCount;
+
+        for(int i = 0;i<GameManager.Instance.pool.prefabs.Length;i++)
+        {
+            if(data.projectile == GameManager.Instance.pool.prefabs[i])
+            {
+                prefabId = i;
+                break;
+            }
+        }
+
         switch(id)
         {
             case 0:
@@ -78,6 +98,8 @@ public class Weapon : MonoBehaviour
             default:
                 break;
         }
+
+        player.BroadcastMessage("ApplyGear",SendMessageOptions.DontRequireReceiver);
     }
 
     void Batch()
@@ -118,6 +140,8 @@ public class Weapon : MonoBehaviour
             //데미지와 관통력 지정
             bullet.GetComponent<Bullet>().Init(damage, -1, Vector3.zero);
         }
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Melee);
+
     }
 
     //총알 발사 함수
@@ -143,5 +167,8 @@ public class Weapon : MonoBehaviour
 
         //데미지와 관통력, 발사 방향 지정
         bullet.GetComponent<Bullet>().Init(damage, count, dir);
+
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Range);
+
     }
 }

@@ -24,6 +24,9 @@ public class Spawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!GameManager.Instance.isLive)
+            return;
+
         timer += Time.deltaTime;
 
         //Mathf.Min = 파라미터를 비교해 더 작은 값을 반환하는 함수
